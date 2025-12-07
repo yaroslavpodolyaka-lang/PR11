@@ -1,0 +1,71 @@
+import nltk
+from nltk.corpus import gutenberg, stopwords
+from nltk import FreqDist
+import string
+import matplotlib.pyplot as plt
+
+
+
+words = gutenberg.words("carroll-alice.txt")   
+print("Перші 20 слів тексту:")
+print(words[:20])
+
+
+
+total_words = len(words)
+print("\nЗагальна кількість слів у тексті:", total_words)
+
+
+
+words_lower = [w.lower() for w in words]
+
+freq_raw = FreqDist(words_lower)
+top10_raw = freq_raw.most_common(10)
+
+print("\nТоп-10 найчастіших слів ДО очищення:")
+for word, freq in top10_raw:
+    print(f"{word}: {freq}")
+
+
+labels = [w for w, f in top10_raw]
+values = [f for w, f in top10_raw]
+
+plt.figure(figsize=(10,5))
+plt.bar(labels, values)
+plt.title("Топ-10 слів (до очищення)")
+plt.xlabel("Слова")
+plt.ylabel("Частота")
+plt.show()
+
+
+
+stop_words = set(stopwords.words("english"))
+puncts = set(string.punctuation)
+
+clean_tokens = []
+for w in words_lower:
+    
+    if w.isalpha() and w not in stop_words:
+        clean_tokens.append(w)
+
+print("\nКількість слів після очищення:", len(clean_tokens))
+
+
+
+freq_clean = FreqDist(clean_tokens)
+top10_clean = freq_clean.most_common(10)
+
+print("\nТоп-10 найчастіших слів ПІСЛЯ очищення:")
+for word, freq in top10_clean:
+    print(f"{word}: {freq}")
+
+
+labels_clean = [w for w, f in top10_clean]
+values_clean = [f for w, f in top10_clean]
+
+plt.figure(figsize=(10,5))
+plt.bar(labels_clean, values_clean, color="green")
+plt.title("Топ-10 слів (після очищення)")
+plt.xlabel("Слова")
+plt.ylabel("Частота")
+plt.show()
