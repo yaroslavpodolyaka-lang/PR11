@@ -1,0 +1,66 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+
+df = pd.read_csv("comptagevelo2009.csv")
+
+
+
+
+df = df.drop(columns=["Unnamed: 1"], errors="ignore")
+
+
+print("Колонки:", df.columns)
+
+
+
+print("\n=== HEAD ===")
+print(df.head())
+
+print("\n=== INFO ===")
+print(df.info())
+
+print("\n=== DESCRIBE ===")
+print(df.describe())
+
+
+df["Date"] = pd.to_datetime(df["Date"], dayfirst=True)
+
+
+df["Month"] = df["Date"].dt.month
+
+
+track_cols = ["Berri1", "Maisonneuve_1", "Maisonneuve_2", "Brébeuf"]
+
+total_all = df[track_cols].sum().sum()
+print("\nЗагальна кількість велосипедистів за рік:", total_all)
+
+
+
+total_by_track = df[track_cols].sum()
+print("\nКількість велосипедистів по кожній доріжці:")
+print(total_by_track)
+
+
+
+print("\nНайпопулярніший місяць:")
+
+for track in track_cols[:3]:  
+    monthly = df.groupby("Month")[track].sum()
+    best_month = monthly.idxmax()
+    print(f"{track}: місяць {best_month}, кількість {monthly[best_month]}")
+
+
+
+track = "Berri1"  
+
+monthly_counts = df.groupby("Month")[track].sum()
+
+plt.figure(figsize=(10, 5))
+plt.plot(monthly_counts.index, monthly_counts.values, marker="o", linewidth=2)
+
+plt.title(f"Завантаженість велодоріжки {track} по місяцях (2009)")
+plt.xlabel("Місяць")
+plt.ylabel("Кількість велосипедистів")
+plt.grid(True)
+plt.show()
