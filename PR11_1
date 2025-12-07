@@ -1,0 +1,75 @@
+import pandas as pd
+
+
+schedule = {
+    12: {"route": "Київ – Харків",    "arr": (7, 45),  "dep": (8,  5)},
+    21: {"route": "Львів – Київ",     "arr": (8, 15),  "dep": (8, 35)},
+    33: {"route": "Одеса – Дніпро",   "arr": (9,  0),  "dep": (9, 25)},
+    45: {"route": "Харків – Полтава", "arr": (10, 10), "dep": (10, 25)},
+    56: {"route": "Суми – Київ",      "arr": (11, 50), "dep": (12, 10)},
+    60: {"route": "Чернівці – Львів", "arr": (12, 30), "dep": (12, 50)},
+    72: {"route": "Запоріжжя – Київ", "arr": (13, 20), "dep": (13, 40)},
+    84: {"route": "Київ – Одеса",     "arr": (14,  5), "dep": (14, 20)},
+    95: {"route": "Миколаїв – Київ",  "arr": (22, 55), "dep": (23, 10)},
+    99: {"route": "Ужгород – Львів",  "arr": (23, 55), "dep": (0,  10)},
+}
+
+df = pd.DataFrame([
+    {
+        "number": number,
+        "route": info["route"],
+        "arr_h": info["arr"][0],
+        "arr_m": info["arr"][1],
+        "dep_h": info["dep"][0],
+        "dep_m": info["dep"][1]
+    }
+    for number, info in schedule.items()
+])
+
+print("=== DataFrame ===")
+print(df)
+
+
+print("\nПерші 3 рядки:")
+print(df.head(3))
+
+print("\nТипи даних:")
+print(df.dtypes)
+
+print("\nФорма DataFrame (рядки, стовпці):")
+print(df.shape)
+
+print("\nОписова статистика числових даних:")
+print(df.describe())
+
+
+df["arr_total"] = df["arr_h"] * 60 + df["arr_m"]
+df["dep_total"] = df["dep_h"] * 60 + df["dep_m"]
+
+df.loc[df["dep_total"] < df["arr_total"], "dep_total"] += 1440
+
+df["stop_minutes"] = df["dep_total"] - df["arr_total"]
+
+print("\nDataFrame з новим стовпцем stop_minutes:")
+print(df)
+
+filtered = df[df["stop_minutes"] > 20]
+print("\nПотяги, що стоять понад 20 хвилин:")
+print(filtered)
+
+sorted_df = df.sort_values(by="stop_minutes", ascending=False)
+print("\nСортування за спаданням stop_minutes:")
+print(sorted_df)
+
+
+df["from_city"] = df["route"].str.split("–").str[0].str.strip()
+group_mean = df.groupby("from_city")["stop_minutes"].mean()
+
+print("\nСередня тривалість стоянки по містах відправлення:")
+print(group_mean)
+
+max_stop = df["stop_minutes"].max()
+unique_routes = df["route"].nunique()
+
+print("\nМаксимальний час стоянки:", max_stop)
+print("Кількість унікальних маршрутів:", unique_routes)
